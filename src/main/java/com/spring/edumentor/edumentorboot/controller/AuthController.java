@@ -31,5 +31,8 @@ public class AuthController {
         return ResponseEntity.ok("User registered successfully");
     }
 
-
+    @GetMapping(value = "/users")
+    public ResponseEntity<?> getUsers(){
+        return ResponseEntity.ok().body(userDAO.getAll());
+    }
 }

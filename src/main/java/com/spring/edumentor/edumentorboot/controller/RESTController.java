@@ -6,6 +6,7 @@ import com.spring.edumentor.edumentorboot.entity.Solution;
 import com.spring.edumentor.edumentorboot.entity.Student;
 import com.spring.edumentor.edumentorboot.service.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,14 +18,15 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 @RestController
 @RequestMapping("/edumentor")
+@CrossOrigin("http://localhost:3000")
 public class RESTController {
 
     @Autowired
     private ServiceImpl service;
 
     @GetMapping("/mentor")
-    public List<Mentor> showAllMentors(){
-        return service.getAllMentors();
+    public ResponseEntity<?> showAllMentors(){
+        return ResponseEntity.ok().body(service.getAllMentors());
     }
 
     @GetMapping("/students")
