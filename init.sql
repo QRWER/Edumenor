@@ -26,3 +26,10 @@ create table homework(
     review varchar,
     time_start timestamp
 );
+
+CREATE TABLE user_table (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR NOT NULl UNIQUE,
+    password VARCHAR NOT NULL,
+    role VARCHAR NOT NULL
+);
