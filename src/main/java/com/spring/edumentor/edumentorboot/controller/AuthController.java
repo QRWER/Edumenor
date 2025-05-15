@@ -1,13 +1,16 @@
 package com.spring.edumentor.edumentorboot.controller;
 
 import com.spring.edumentor.edumentorboot.dao.UserDAO;
-import com.spring.edumentor.edumentorboot.entity.Role;
+import com.spring.edumentor.edumentorboot.entity.Mentor;
+import com.spring.edumentor.edumentorboot.entity.Student;
 import com.spring.edumentor.edumentorboot.entity.User;
-import com.spring.edumentor.edumentorboot.service.UserDetailsServiceImpl;
+import com.spring.edumentor.edumentorboot.service.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 @RestController
 @RequestMapping("/auth")
@@ -16,6 +19,9 @@ public class AuthController {
 
     @Autowired
     private UserDAO userDAO;
+
+    @Autowired
+    private ServiceImpl service;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -31,8 +37,15 @@ public class AuthController {
         return ResponseEntity.ok("User registered successfully");
     }
 
-    @GetMapping(value = "/users")
-    public ResponseEntity<?> getUsers(){
-        return ResponseEntity.ok().body(userDAO.getAll());
+    @PostMapping(value = "/mentor")
+    public ResponseEntity<?> addMentor(@RequestBody Mentor mentor){
+        Mentor newMentor = service.addMentor(mentor);
+        return newMentor==null?ResponseEntity.badRequest().build():ResponseEntity.ok(newMentor);
+    }
+
+    @PostMapping(value = "/student")
+    public ResponseEntity<?> addStudent(@RequestBody Student student){
+        Student newStudent = service.addStudent(student);
+        return newStudent==null?ResponseEntity.badRequest().build():ResponseEntity.ok(newStudent);
     }
 }

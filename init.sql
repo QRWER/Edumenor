@@ -1,35 +1,45 @@
-create table mentor(
-    id serial primary key,
-    fullname varchar,
-    subject varchar,
-    education varchar
-);
-
-create table student(
-    id serial primary key,
-    fullname varchar,
-    school varchar
-);
-
-create table solution(
-    id serial primary key,
-    photo bytea,
-    time_end timestamp
-);
-
-create table homework(
-    id serial primary key,
-    id_mentor int references mentor(id),
-    id_student int references student(id),
-    task bytea,
-    id_solution int references solution(id),
-    review varchar,
-    time_start timestamp
-);
-
 CREATE TABLE user_table (
-    id SERIAL PRIMARY KEY,
+    id SERIAL PRIMARY KEY UNIQUE ,
     username VARCHAR NOT NULl UNIQUE,
     password VARCHAR NOT NULL,
     role VARCHAR NOT NULL
 );
+
+create table mentor(
+    id serial references user_table(id) UNIQUE ,
+    fullname varchar NOT NULL,
+    subject varchar NOT NULL,
+    education varchar
+);
+
+create table student(
+    id serial references user_table(id) UNIQUE,
+    fullname varchar NOT NULL ,
+    school varchar
+);
+
+create table homework(
+     id serial primary key,
+     id_mentor int references mentor(id) NOT NULL ,
+     id_student int references student(id) NOT NULL ,
+     task bytea NOT NULL ,
+     time_create timestamp NOT NULL
+);
+
+create table solution(
+    id serial references homework(id),
+    photo bytea NOT NULL ,
+    time_create timestamp NOT NULL
+);
+
+CREATE TABLE review(
+    id serial references homework(id),
+    body_review varchar NOT NULL,
+    time_create timestamp NOT NULL
+);
+
+INSERT INTO user_table values (1, 'us1', 'pas1', 'ROLE_MENTOR');
+INSERT INTO mentor values (1, 'Шкалей Илья Русланович', 'Информатика', 'Школа №178');
+
+INSERT INTO user_table values (2, 'us2', 'pas2', 'ROLE_STUDENT');
+INSERT INTO student values (2, 'Иванов Иван Иванович', 'МБОУ СОШ №123');

@@ -1,13 +1,7 @@
 package com.spring.edumentor.edumentorboot.service;
 
-import com.spring.edumentor.edumentorboot.dao.HomeworkDAO;
-import com.spring.edumentor.edumentorboot.dao.MentorDAO;
-import com.spring.edumentor.edumentorboot.dao.SolutionDAO;
-import com.spring.edumentor.edumentorboot.dao.StudentDAO;
-import com.spring.edumentor.edumentorboot.entity.Homework;
-import com.spring.edumentor.edumentorboot.entity.Mentor;
-import com.spring.edumentor.edumentorboot.entity.Solution;
-import com.spring.edumentor.edumentorboot.entity.Student;
+import com.spring.edumentor.edumentorboot.dao.*;
+import com.spring.edumentor.edumentorboot.entity.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +20,8 @@ public class ServiceImpl {
     private SolutionDAO solutionDAO;
     @Autowired
     private StudentDAO studentDAO;
+    @Autowired
+    private ReviewDAO reviewDAO;
 
     @Transactional
     public List<Mentor> getAllMentors() {
@@ -35,6 +31,11 @@ public class ServiceImpl {
     @Transactional
     public List<Student> getAllStudents(){
         return studentDAO.getAll();
+    }
+
+    @Transactional
+    public List<Student> getStudentByName(String name){
+        return studentDAO.getByName(name);
     }
 
     @Transactional
@@ -53,11 +54,24 @@ public class ServiceImpl {
     }
 
     @Transactional
+    public Homework getHomeworkById(Integer id){
+        return homeworkDAO.getById(id);
+    }
+
+    @Transactional
     public Solution getSolution(Integer id){
-        Integer idSolution = homeworkDAO.getIdSolution(id);
-        if(idSolution == null)
+        Solution solution = solutionDAO.getById(id);
+        if(solution == null)
             throw new NoSuchElementException("У задания с Id = " + id + " нет решения");
-        return solutionDAO.getById(idSolution);
+        return solution;
+    }
+
+    @Transactional
+    public Review getReviewById(Integer id){
+        Review review = reviewDAO.getById(id);
+        if(review == null)
+            throw new NoSuchElementException("У заданния с Id = " + id + " нет оценки решения");
+        return review;
     }
 
     @Transactional
@@ -91,6 +105,11 @@ public class ServiceImpl {
     }
 
     @Transactional
+    public Review addReview(Review review) {
+        return reviewDAO.save(review);
+    }
+
+    @Transactional
     public void deleteMentor(int id){
         mentorDAO.deleteById(id);
     }
@@ -108,5 +127,10 @@ public class ServiceImpl {
     @Transactional
     public void deleteHomework(int id){
         homeworkDAO.deleteById(id);
+    }
+
+    @Transactional
+    public void deleteReview(int id){
+        reviewDAO.deleteById(id);
     }
 }

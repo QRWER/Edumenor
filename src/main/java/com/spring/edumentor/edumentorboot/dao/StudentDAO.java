@@ -3,6 +3,7 @@ package com.spring.edumentor.edumentorboot.dao;
 import com.spring.edumentor.edumentorboot.entity.Student;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,15 @@ public class StudentDAO implements DAO<Student> {
     public Student getById(Integer id) {
         Session session = entityManager.unwrap(Session.class);
         return session.get(Student.class, id);
+    }
+
+    public List<Student> getByName(String name) {
+        name = "%" + name.toLowerCase() + "%";
+        Session session = entityManager.unwrap(Session.class);
+        Query query = session.createQuery("from Student where lower(fullName) like :name ", Student.class);
+        query.setParameter("name", name);
+        List<Student> students = query.getResultList();
+        return students;
     }
 
     @Override

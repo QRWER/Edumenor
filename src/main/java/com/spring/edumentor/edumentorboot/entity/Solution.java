@@ -10,25 +10,24 @@ import java.util.Date;
 public class Solution {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
 
     @Column(name = "photo", columnDefinition = "bytea[]")
     private byte[] photo;
 
-    @Column(name = "time_end")
-    private Timestamp timeEnd;
+    @Column(name = "time_create")
+    private Timestamp timeCreate;
 
-    public Solution(Integer id, byte[] photo, Timestamp timeEnd) {
+    public Solution(Integer id, byte[] photo) {
         this.id = id;
         this.photo = photo;
-        this.timeEnd = timeEnd;
+        this.timeCreate = new Timestamp(new Date().getTime());
     }
 
     public Solution(byte[] photo) {
         this.photo = photo;
-        this.timeEnd = new Timestamp(new Date().getTime());
+        this.timeCreate = new Timestamp(new Date().getTime());
     }
 
     public Solution() {
@@ -50,19 +49,19 @@ public class Solution {
         this.photo = photo;
     }
 
-    public Timestamp getTimeEnd() {
-        return timeEnd;
+    public Timestamp getTimeCreate() {
+        return timeCreate;
     }
 
-    public void setTimeEnd(Timestamp timeEnd) {
-        this.timeEnd = timeEnd;
+    public void setTimeCreate(Timestamp timeEnd) {
+        this.timeCreate = timeEnd;
     }
 
     @Override
     public String toString() {
         return "Solution{" +
                 "id=" + id +
-                ", timeEnd=" + timeEnd +
+                ", timeEnd=" + timeCreate +
                 '}';
     }
 }

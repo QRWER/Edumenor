@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 
 @Entity
 @Table(name = "homework")
@@ -25,25 +24,25 @@ public class Homework {
     @Column(name = "task")
     private byte[] task;
 
-    @Column(name = "id_solution")
-    private Integer idSolution;
-
-    @Column(name = "review")
-    private String review;
-
-    @Column(name = "time_start")
-    private Timestamp timeStart;
+    @Column(name = "time_create")
+    private Timestamp timeCreate;
 
     public Homework() {
+    }
+
+    public Homework(Integer id, Integer idMentor, Integer idStudent, byte[] task) {
+        this.id = id;
+        this.idMentor = idMentor;
+        this.idStudent = idStudent;
+        this.task = task;
+        this.timeCreate = new Timestamp(new Date().getTime());
     }
 
     public Homework(Integer idMentor, Integer idStudent, byte[] task) {
         this.idMentor = idMentor;
         this.idStudent = idStudent;
         this.task = task;
-        this.idSolution = null;
-        this.review = null;
-        this.timeStart = new Timestamp(new Date().getTime());
+        this.timeCreate = new Timestamp(new Date().getTime());
     }
 
     public Integer getId() {
@@ -78,28 +77,12 @@ public class Homework {
         this.task = task;
     }
 
-    public Integer getIdSolution() {
-        return idSolution;
+    public Timestamp getTimeCreate() {
+        return timeCreate;
     }
 
-    public void setIdSolution(Integer idSolution) {
-        this.idSolution = idSolution;
-    }
-
-    public String getReview() {
-        return review;
-    }
-
-    public void setReview(String review) {
-        this.review = review;
-    }
-
-    public Timestamp getTimeStart() {
-        return timeStart;
-    }
-
-    public void setTimeStart(Timestamp timeStart) {
-        this.timeStart = timeStart;
+    public void setTimeCreate(Timestamp timeStart) {
+        this.timeCreate = timeStart;
     }
 
 
@@ -111,9 +94,7 @@ public class Homework {
                 ", idMentor=" + idMentor +
                 ", idStudent=" + idStudent +
                 ", task=" + Arrays.toString(task) +
-                ", idSolution=" + idSolution +
-                ", review='" + review + '\'' +
-                ", timeStart=" + timeStart +
+                ", timeStart=" + timeCreate +
                 '}';
     }
 }

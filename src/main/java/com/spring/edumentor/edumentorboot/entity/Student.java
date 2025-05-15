@@ -7,7 +7,6 @@ import jakarta.persistence.*;
 public class Student {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
 
@@ -16,13 +15,6 @@ public class Student {
 
     @Column(name = "school")
     private String school;
-
-//    @ManyToMany(cascade = CascadeType.ALL) //изменить тип каскада
-//    @JoinTable(
-//            name = "homework",
-//            joinColumns = @JoinColumn(name = "id_student"),
-//            inverseJoinColumns = @JoinColumn(name = "id"))
-//    private List<Homework> homeworks;
 
     public Student() {
     }

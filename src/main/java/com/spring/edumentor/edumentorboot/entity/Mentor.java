@@ -2,13 +2,10 @@ package com.spring.edumentor.edumentorboot.entity;
 
 import jakarta.persistence.*;
 
-import java.util.List;
-
 @Entity
 @Table(name = "mentor")
 public class Mentor {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
 
@@ -21,14 +18,11 @@ public class Mentor {
     @Column(name = "education")
     private String education;
 
-//    @OneToMany(cascade = CascadeType.ALL) //возможно поменять тип каскада
-//    @JoinColumn(name = "id_mentor")
-//    private List<Homework> homeworks;
-
     public Mentor() {
     }
 
-    public Mentor(String fullName, String subject, String education) {
+    public Mentor(int id, String fullName, String subject, String education) {
+        this.id = id;
         this.fullName = fullName;
         this.subject = subject;
         this.education = education;

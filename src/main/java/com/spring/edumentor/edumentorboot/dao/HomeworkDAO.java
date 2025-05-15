@@ -58,9 +58,4 @@ public class HomeworkDAO implements DAO<Homework> {
         List<Homework> all = query.getResultList();
         return all;
     }
-
-    public Integer getIdSolution(Integer id){
-        Homework homework = getById(id);
-        return homework.getIdSolution();
-    }
 }
