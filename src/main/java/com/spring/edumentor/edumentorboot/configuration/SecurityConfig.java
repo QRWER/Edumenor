@@ -39,12 +39,16 @@ public class SecurityConfig{
         http
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers("/auth/**", "/login").permitAll()
-                        .requestMatchers("/logout").authenticated()
+                        .requestMatchers("/logout", "/auth/password").authenticated()
                         .requestMatchers("/mentor/**").hasRole("MENTOR")
                         .requestMatchers("/student/**").hasRole("STUDENT")
                         .anyRequest().authenticated()
                 )
-                .formLogin(Customizer.withDefaults())
+                .formLogin(login -> login
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/", true)
+                        .permitAll()
+                )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout")

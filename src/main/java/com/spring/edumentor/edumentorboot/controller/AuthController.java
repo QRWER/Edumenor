@@ -7,8 +7,12 @@ import com.spring.edumentor.edumentorboot.entity.User;
 import com.spring.edumentor.edumentorboot.service.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
@@ -48,4 +52,18 @@ public class AuthController {
         Student newStudent = service.addStudent(student);
         return newStudent==null?ResponseEntity.badRequest().build():ResponseEntity.ok(newStudent);
     }
+
+    @PutMapping(value = "/password")
+    public ResponseEntity<?> changePassword(@RequestParam String oldPassword,
+                                            @RequestParam String newPassword){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = userDAO.getByUsername(authentication.getName());
+        if(passwordEncoder.matches(oldPassword, user.getPassword())){
+            user.setPassword(passwordEncoder.encode(newPassword));
+            userDAO.save(user);
+            return ResponseEntity.ok("Password was changed.");
+        }
+        return ResponseEntity.badRequest().body("oldPassword doesn't match with current password");
+    }
+
 }
