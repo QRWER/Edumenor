@@ -1,0 +1,178 @@
+/* Основные стили */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+.home-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Шапка */
+.header {
+    background-color: #2c3e50;
+    color: white;
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 1.8rem;
+}
+
+/* Основное содержимое */
+.main-content {
+    flex: 1;
+    padding: 2rem;
+}
+
+.homeworks-list {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.homeworks-list h2 {
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+}
+
+/* Карточки домашних заданий */
+.homework-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.homework-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+
+.homework-card:hover {
+    transform: translateY(-5px);
+}
+
+.homework-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+    background-color: #3498db;
+    color: white;
+}
+
+.homework-id {
+    font-weight: bold;
+}
+
+.homework-date {
+    font-size: 0.9rem;
+}
+
+.homework-meta {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.meta-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.meta-label {
+    font-size: 0.8rem;
+    color: #7f8c8d;
+}
+
+.meta-value {
+    font-weight: bold;
+}
+
+.homework-task {
+    padding: 1rem;
+}
+
+.homework-task h3 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    color: #2c3e50;
+}
+
+.task-image {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    border: 1px solid #eee;
+}
+
+/* Подвал */
+.footer {
+    text-align: center;
+    padding: 1rem;
+    background-color: #2c3e50;
+    color: white;
+    font-size: 0.9rem;
+}
+
+/* Состояния загрузки и ошибки */
+.loading, .error {
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.2rem;
+}
+
+.error {
+    color: #e74c3c;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .homework-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .header h1 {
+        font-size: 1.5rem;
+    }
+}
+
+.homework-card-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.homework-card {
+    /* Добавьте это свойство */
+    cursor: pointer;
+    /* Остальные стили без изменений */
+}
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logout-button {
+    background: none;
+    border: 1px solid white;
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.logout-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
