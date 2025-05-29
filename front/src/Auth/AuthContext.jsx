@@ -3,107 +3,117 @@ import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext();
 
+export function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(";").shift();
+}
+
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
-    // Функция верификации токена
+
     const verifyToken = useCallback(async () => {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            setLoading(false);
-            return;
-        }
-
         try {
-            // В реальном приложении: запрос к API для проверки токена
-            // const response = await fetch('/api/auth/verify', {
-            //   headers: { Authorization: `Bearer ${token}` }
-            // });
-            // const data = await response.json();
+            const res = await fetch('http://localhost:8080/auth/valid', {
+                method: 'GET',
+                credentials: 'include' // <-- очень важно!
+            });
 
-            // Моковая проверка
-            const decoded = parseJwt(token);
-            if (decoded && decoded.exp * 1000 > Date.now()) {
-                setUser({
-                    username: decoded.username,
-                    role: decoded.role
-                });
-            } else {
-                logout();
+            if (!res.ok) {
+                setUser(null);
+                setLoading(false);
+                return;
             }
+
+            const data = await res.json();
+
+            console.log(data)
+
+            setUser({
+                id: data.id,
+                username: data.username,
+                role: data.roles[0] || null
+            });
         } catch (error) {
-            logout();
+            console.error('Ошибка верификации:', error);
+            setUser(null);
         } finally {
             setLoading(false);
         }
     }, []);
 
-    // Проверяем токен при загрузке и при изменении
+    // Выполняем верификацию при загрузке
     useEffect(() => {
+        console.log("Я юзер:", user);
         verifyToken();
     }, [verifyToken]);
 
-    const parseJwt = (token) => {
-        try {
-            return JSON.parse(atob(token.split('.')[1]));
-        } catch {
-            return null;
-        }
-    };
-
     const login = async ({ username, password }) => {
-        try {
-            // Моковая авторизация - в реальном приложении замените на API-запрос
-            let mockUser;
-            if (username === 'mentor' && password === 'mentor123') {
-                mockUser = { username: 'mentor', role: 'MENTOR' };
-            } else if (username === 'student' && password === 'student123') {
-                mockUser = { username: 'student', role: 'STUDENT' };
-            } else {
-                throw new Error('Неверный логин или пароль');
-            }
+        const xsrfToken = getCookie('XSRF-TOKEN'); // если нужен CSRF
 
-            const mockToken = generateMockToken(mockUser);
-            localStorage.setItem('token', mockToken);
-            await verifyToken(); // Явно вызываем верификацию
-            navigate(mockUser.role === 'MENTOR' ? '/mentor' : '/student');
+        const response = await fetch('http://localhost:8080/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-XSRF-TOKEN': xsrfToken // только если используется CSRF
+            },
+            body: JSON.stringify({ username, password }),
+            credentials: 'include' // <-- отправляем куки
+        });
 
-            return { success: true };
-        } catch (error) {
-            return { success: false, message: error.message };
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Ошибка входа');
         }
+
+        const data = await response.json();
+
+        setUser({
+            id: data.id,
+            username: data.username,
+            role: data.roles[0]
+        });
+
+        navigate(data.roles.includes("ROLE_MENTOR") ? '/mentor' : '/student');
+
+        return { success: true };
     };
 
-    const logout = () => {
-        localStorage.removeItem('token');
+    const logout = async () => {
+        await fetch('http://localhost:8080/auth/logout', {
+            method: 'POST',
+            credentials: 'include'
+        });
+
         setUser(null);
         navigate('/login');
     };
 
-    // Генерация мокового токена с expire time (7 дней)
-    const generateMockToken = (user) => {
-        const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-        const payload = btoa(JSON.stringify({
-            ...user,
-            exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 7) // 7 дней
-        }));
-        return `${header}.${payload}.mock_signature`;
-    };
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(";").shift();
+    }
 
+    // Проверка доступа
     const checkAccess = useCallback((requiredRole) => {
         if (!user) return false;
         if (!requiredRole) return true;
         return user.role === requiredRole;
     }, [user]);
 
-    return (
-        <AuthContext.Provider value={{ user, loading, login, logout, checkAccess }}>
-            {children}
-        </AuthContext.Provider>
-    );
+    const value = {
+        user,
+        loading,
+        login,
+        logout,
+        checkAccess
+    };
 
+    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => useContext(AuthContext);

@@ -125,3 +125,12 @@
 .submit-btn:hover {
     background-color: #27ae60;
 }
+
+.no-homework {
+    font-size: 18px;
+    color: #666;
+    text-align: center;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+}

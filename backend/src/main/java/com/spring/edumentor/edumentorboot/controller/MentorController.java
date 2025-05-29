@@ -40,7 +40,7 @@ public class MentorController {
     @GetMapping("/homework")
     public ResponseEntity<?> showAllHomeworkByMentor(@RequestParam("idMentor") int id){
         List<Homework> homeworks = service.getAllHomeworkForMentor(id);
-        return homeworks.isEmpty()?ResponseEntity.notFound().build():ResponseEntity.ok(homeworks);
+        return ResponseEntity.ok(homeworks);
     }
 
     @GetMapping("/homework/{idHomework}")

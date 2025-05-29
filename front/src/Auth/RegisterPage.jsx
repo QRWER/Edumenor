@@ -6,7 +6,8 @@ const RegisterPage = () => {
     const [formData, setFormData] = useState({
         username: '',
         password: '',
-        role: '',
+        fullname: '',
+        role: 'ROLE_STUDENT',
         school: '',
         subject: '',
         education: ''
@@ -28,6 +29,7 @@ const RegisterPage = () => {
 
         if (!formData.username) newErrors.username = 'Логин обязателен';
         if (!formData.password) newErrors.password = 'Пароль обязателен';
+        if (!formData.fullname) newErrors.fullname = 'ФИО обязательно';
         if (!formData.role) newErrors.role = 'Роль обязательна';
 
         if (formData.role === 'Student' && !formData.school) {
@@ -49,16 +51,11 @@ const RegisterPage = () => {
         if (!validate()) return;
 
         try {
-            // Здесь будет реальный запрос к API
-            // const response = await fetch('/api/auth/register', {
-            //   method: 'POST',
-            //   headers: { 'Content-Type': 'application/json' },
-            //   body: JSON.stringify(formData)
-            // });
-
-            // Моковый ответ
-            console.log('Registration data:', formData);
-            alert('Registration successful!');
+            const response = await fetch('http://localhost:8080/auth/register', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(formData)
+            });
             navigate('/login');
         } catch (error) {
             console.error('Registration error:', error);
@@ -97,6 +94,18 @@ const RegisterPage = () => {
                     </div>
 
                     <div className="form-group">
+                        <label>ФИО*</label>
+                        <input
+                            type="text"
+                            name="fullname"
+                            value={formData.fullname}
+                            onChange={handleChange}
+                            className={errors.fullname ? 'error' : ''}
+                        />
+                        {errors.fullname && <span className="error-message">{errors.fullname}</span>}
+                    </div>
+
+                    <div className="form-group">
                         <label>Роль*</label>
                         <select
                             name="role"
@@ -104,14 +113,13 @@ const RegisterPage = () => {
                             onChange={handleChange}
                             className={errors.role ? 'error' : ''}
                         >
-                            <option value="">Select role</option>
-                            <option value="Student">Student</option>
-                            <option value="Mentor">Mentor</option>
+                            <option value="ROLE_STUDENT">Student</option>
+                            <option value="ROLE_MENTOR">Mentor</option>
                         </select>
                         {errors.role && <span className="error-message">{errors.role}</span>}
                     </div>
 
-                    {formData.role === 'Student' && (
+                    {formData.role === 'ROLE_STUDENT' && (
                         <div className="form-group">
                             <label>Школа*</label>
                             <input
@@ -125,7 +133,7 @@ const RegisterPage = () => {
                         </div>
                     )}
 
-                    {formData.role === 'Mentor' && (
+                    {formData.role === 'ROLE_MENTOR' && (
                         <>
                             <div className="form-group">
                                 <label>Предмет*</label>

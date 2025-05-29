@@ -19,15 +19,28 @@ const PrivateRoute = ({ children, requiredRole }) => {
         return <Navigate to="/login" replace />;
     }
 
-    if (requiredRole && user.role !== requiredRole) {
-        // Показываем страницу "Доступ запрещен" вместо редиректа
-        return (
-            <div className="access-denied">
-                <h2>Доступ запрещен</h2>
-                <p>У вас нет прав для просмотра этой страницы</p>
-                <button onClick={() => window.history.back()}>Назад</button>
-            </div>
-        );
+    // Получаем роль пользователя безопасно
+    const getUserRole = () => {
+        if (!user) return null;
+
+        // Если role — строка, например: "ROLE_MENTOR"
+        if (typeof user.role === 'string') {
+            return user.role;
+        }
+
+        // Если role — объект с полем authority
+        if (user.roles && typeof user.role === 'object' && 'authority' in user.role) {
+            return user.role.authority;
+        }
+
+        return null;
+    };
+
+    const userRole = getUserRole();
+
+    // Проверяем доступ
+    if (requiredRole && userRole !== requiredRole) {
+        return <Navigate to="/access-denied" />;
     }
 
     return children;
@@ -49,13 +62,13 @@ function App() {
                     } />
 
                     <Route path="/mentor/*" element={
-                        <PrivateRoute requiredRole="MENTOR">
+                        <PrivateRoute requiredRole="ROLE_MENTOR">
                             <MentorDashboard />
                         </PrivateRoute>
                     } />
 
                     <Route path="/student/*" element={
-                        <PrivateRoute requiredRole="STUDENT">
+                        <PrivateRoute requiredRole="ROLE_STUDENT">
                             <StudentDashboard />
                         </PrivateRoute>
                     } />

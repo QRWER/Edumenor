@@ -37,9 +37,3 @@ CREATE TABLE review(
     body_review varchar NOT NULL,
     time_create timestamp NOT NULL
 );
-
-INSERT INTO user_table values (1, 'us1', 'pas1', 'ROLE_MENTOR');
-INSERT INTO mentor values (1, 'Шкалей Илья Русланович', 'Информатика', 'Школа №178');
-
-INSERT INTO user_table values (2, 'us2', 'pas2', 'ROLE_STUDENT');
-INSERT INTO student values (2, 'Иванов Иван Иванович', 'МБОУ СОШ №123');
