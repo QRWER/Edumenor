@@ -16,11 +16,11 @@ const LoginPage = () => {
         e.preventDefault();
         setError('');
 
-        const result = await login({ username, password });
-        if (!result.success) {
-            setError(result.message);
+        try {
+            await login({ username, password });
+        } catch (err) {
+            setError(err.message); // ← именно здесь мы получаем сообщение от сервера
         }
-        // Перенаправление происходит внутри AuthContext
     };
 
     return (

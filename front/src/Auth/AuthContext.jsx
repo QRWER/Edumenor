@@ -46,32 +46,46 @@ export const AuthProvider = ({ children }) => {
     }, [verifyToken]);
 
     const login = async ({ username, password }) => {
+        try {
+            const response = await fetch('http://localhost:8080/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password }),
+                credentials: 'include'
+            });
 
-        const response = await fetch('http://localhost:8080/auth/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ username, password }),
-            credentials: 'include' // <-- отправляем куки
-        });
+            if (!response.ok) {
+                let errorMessage = 'Неправильный логин или пароль';
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Ошибка входа');
+                // Если сервер возвращает JSON с сообщением
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.message || 'Неправильный логин или пароль';
+                } catch (jsonError) {
+                    // Если JSON не может быть прочитан — просто покажем стандартную ошибку
+                    console.warn("Не удалось разобрать JSON:", jsonError);
+                }
+
+                throw new Error(errorMessage);
+            }
+
+            const data = await response.json();
+
+            setUser({
+                id: data.id,
+                username: data.username,
+                role: data.roles[0]
+            });
+
+            navigate(data.roles.includes("ROLE_MENTOR") ? '/mentor' : '/student');
+
+            return { success: true };
+        } catch (error) {
+            console.error("Ошибка входа:", error.message);
+            throw error;
         }
-
-        const data = await response.json();
-
-        setUser({
-            id: data.id,
-            username: data.username,
-            role: data.roles[0]
-        });
-
-        navigate(data.roles.includes("ROLE_MENTOR") ? '/mentor' : '/student');
-
-        return { success: true };
     };
 
     const logout = async () => {

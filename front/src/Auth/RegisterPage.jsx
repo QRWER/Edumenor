@@ -47,19 +47,29 @@ const RegisterPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+        setErrors('')
         if (!validate()) return;
 
         try {
             const response = await fetch('http://localhost:8080/auth/register', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(formData)
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
             });
+
+            if (!response.ok) {
+                const newErrors = {};
+                newErrors.username = 'Такой логин уже существует'
+                setErrors(newErrors);
+                return;
+            }
+
             navigate('/login');
+
         } catch (error) {
-            console.error('Registration error:', error);
-            alert('Registration failed');
+            const newErrors = {};
+            newErrors.username = 'Такой логин уже существует'
+            setErrors(newErrors);
         }
     };
 
@@ -78,7 +88,9 @@ const RegisterPage = () => {
                             onChange={handleChange}
                             className={errors.username ? 'error' : ''}
                         />
-                        {errors.username && <span className="error-message">{errors.username}</span>}
+                        {errors.username && (
+                            <span className="error-message">{errors.username}</span>
+                        )}
                     </div>
 
                     <div className="form-group">
