@@ -1,12 +1,14 @@
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import {AuthProvider, useAuth} from './Auth/AuthContext';
-import HomePage from './HomePage/HomePage';
+import HomeRedirect from './Dashboard/HomeRedirect';
 import LoginPage from './Auth/LoginPage';
 import MentorDashboard from './Dashboard/MentorDashboard';
 import StudentDashboard from './Dashboard/StudentDashboard';
 import AccessDeniedPage from "./Auth/AccessDeniedPage";
 import RegisterPage from './Auth/RegisterPage';
-import HomeworkDetailPage from "./HomeworkDetails/HomeworkDetailPage";
+import MentorHomeworkDetailPage from "./HomeworkDetails/MentorHomeworkDetailPage";
+import StudentHomeworkDetailPage from "./HomeworkDetails/StudentHomeworkDetailPage";
+import NotFoundPage from "./Auth/NotFoundPage";
 
 const PrivateRoute = ({ children, requiredRole }) => {
     const { user, loading } = useAuth();
@@ -28,7 +30,6 @@ const PrivateRoute = ({ children, requiredRole }) => {
             return user.role;
         }
 
-        // Если role — объект с полем authority
         if (user.roles && typeof user.role === 'object' && 'authority' in user.role) {
             return user.role.authority;
         }
@@ -52,14 +53,9 @@ function App() {
             <AuthProvider>
                 <Routes>
                     <Route path="/login" element={<LoginPage />} />
-
                     <Route path="/register" element={<RegisterPage />} />
 
-                    <Route path="/" element={
-                        <PrivateRoute>
-                            <HomePage />
-                        </PrivateRoute>
-                    } />
+                    <Route path="/" element={<HomeRedirect />} />
 
                     <Route path="/mentor/*" element={
                         <PrivateRoute requiredRole="ROLE_MENTOR">
@@ -73,9 +69,19 @@ function App() {
                         </PrivateRoute>
                     } />
 
-                    <Route path="/homework/:id" element={<HomeworkDetailPage />} />
+                    <Route path="/mentor/homework/:id" element={
+                        <PrivateRoute requiredRole="ROLE_MENTOR">
+                            <MentorHomeworkDetailPage />
+                        </PrivateRoute>
+                        } />
 
+                    <Route path="/student/homework/:id" element={
+                        <PrivateRoute requiredRole="ROLE_STUDENT">
+                            <StudentHomeworkDetailPage />
+                        </PrivateRoute>
+                    } />
                     <Route path="/access-denied" element={<AccessDeniedPage />} />
+                    <Route path="*" element={<NotFoundPage />} />
                 </Routes>
             </AuthProvider>
         </Router>

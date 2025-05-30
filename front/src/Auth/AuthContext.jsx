@@ -3,12 +3,6 @@ import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext();
 
-export function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(";").shift();
-}
-
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -52,13 +46,11 @@ export const AuthProvider = ({ children }) => {
     }, [verifyToken]);
 
     const login = async ({ username, password }) => {
-        const xsrfToken = getCookie('XSRF-TOKEN'); // если нужен CSRF
 
         const response = await fetch('http://localhost:8080/auth/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-XSRF-TOKEN': xsrfToken // только если используется CSRF
             },
             body: JSON.stringify({ username, password }),
             credentials: 'include' // <-- отправляем куки
@@ -91,12 +83,6 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
         navigate('/login');
     };
-
-    function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(";").shift();
-    }
 
     // Проверка доступа
     const checkAccess = useCallback((requiredRole) => {

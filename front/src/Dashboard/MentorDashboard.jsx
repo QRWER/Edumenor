@@ -1,7 +1,7 @@
     import React, { useState, useEffect } from 'react';
     import './MentorDashboard.css';
     import { Link } from 'react-router-dom';
-    import {getCookie, useAuth} from '../Auth/AuthContext';
+    import {useAuth} from '../Auth/AuthContext';
 
     const HomePage = () => {
         const { user, logout } = useAuth();
@@ -10,6 +10,7 @@
         const [error, setError] = useState(null);
         const [showAddForm, setShowAddForm] = useState(false);
         const [students, setStudents] = useState([]);
+        const [mentor, setMentor] = useState([]);
         const [searchTerm, setSearchTerm] = useState('');
         const [formData, setFormData] = useState({
             studentId: '',
@@ -17,31 +18,53 @@
             description: '',
             studentSearch: ''
         });
+        const [formError, setFormError] = useState('');
 
-        const xsrfToken = getCookie('XSRF-TOKEN');
+        const fetchHomeworks = async () => {
+            try {
+                const response = await fetch(`http://localhost:8080/mentor/homework?idMentor=${user.id}`, {
+                    method: 'GET',
+                    credentials: 'include' // <-- очень важно!
+                });
+                if (!response.ok) throw new Error('Ошибка загрузки заданий');
+
+                const data = await response.json();
+                const formattedHomework = data.map(homework => ({
+                    id: homework.id,
+                    idMentor: homework.idMentor,
+                    idStudent: homework.idStudent,
+                    task: homework.task,
+                    timeCreate: homework.timeCreate
+                }));
+                setHomeworks(formattedHomework);
+                setLoading(false);
+            } catch (err) {
+                setError(err.message);
+                setLoading(false);
+            }
+        };
 
         // Загрузка данных с бекенда
         useEffect(() => {
-            const fetchHomeworks = async () => {
-                try {
-                    const response = await fetch(`http://localhost:8080/mentor/homework?idMentor=${user.id}`, {
-                        method: 'GET',
-                        credentials: 'include' // <-- очень важно!
-                    });
-                    if (!response.ok) throw new Error('Ошибка загрузки заданий');
 
-                    const data = await response.json();
-                    const formattedHomework = data.map(homework => ({
-                        id: homework.id,
-                        idMentor: homework.idMentor,
-                        idStudent: homework.idStudent,
-                        task: homework.task,
-                        timeCreate: homework.timeCreate
-                    }));
-                    setHomeworks(formattedHomework);
+            const fetchProfile = async () => {
+                try {
+                    const response = await fetch(`http://localhost:8080/mentor/profile`, {
+                        method: 'GET',
+                        credentials: 'include' // важно для HttpOnly кук
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Ошибка загрузки профиля');
+                    }
+
+                    const data = await response.json(); // сервер должен вернуть объект ментора
+
+                    setMentor(data); // <-- например, состояние useAuth()
                     setLoading(false);
                 } catch (err) {
                     setError(err.message);
+                    console.error('Ошибка при загрузке профиля:', err.message);
                     setLoading(false);
                 }
             };
@@ -70,13 +93,16 @@
 
             fetchHomeworks();
             fetchStudents();
-            console.log("Я юзер:", user);
+            fetchProfile();
         }, []);
 
         useEffect(() => {
             console.log('Студенты:', students);
-            console.log("Я юзер:", user);
         }, [students]);
+
+        useEffect(() => {
+            console.log('Домашки:', homeworks);
+        }, [homeworks]);
 
         const handleInputChange = (e) => {
             const { name, value } = e.target;
@@ -95,17 +121,21 @@
         const handleSubmit = async (e) => {
             e.preventDefault();
 
+            if (!formData.studentId || formData.studentId === '') {
+                setFormError('Выберите студента перед отправкой');
+                return;
+            }
+
+            setFormError(''); // Очистить ошибку, если всё ок
+
             const homeworkData = new FormData();
-            homeworkData.append('id_mentor', user.id);
-            homeworkData.append('id_student', formData.studentId);
+            homeworkData.append('idMentor', user.id);
+            homeworkData.append('idStudent', formData.studentId);
             homeworkData.append('task', formData.taskImage);
-            console.log(xsrfToken);
+
             try {
                 const response = await fetch('http://localhost:8080/mentor/homework', {
                     method: 'POST',
-                    headers: {
-                        'X-XSRF-TOKEN': xsrfToken || ''
-                    },
                     body: homeworkData,
                     credentials: 'include'
                 });
@@ -114,6 +144,7 @@
                     throw new Error('Не удалось отправить задание');
                 }
 
+                fetchHomeworks();
                 const newHomework = await response.json();
                 setHomeworks([...homeworks, newHomework]);
                 setShowAddForm(false);
@@ -150,7 +181,7 @@
                             </button>
                         )}
                         <div className="user-info">
-                            <span>{user?.username} ({user?.role})</span>
+                            <span>{mentor.fullName} ({user?.role})</span>
                             <button onClick={logout} className="logout-button">Выйти</button>
                         </div>
                     </div>
@@ -164,19 +195,21 @@
                     }
                         <div className="homework-cards">
                             {homeworks.map(homework => (
-                                <Link to={`/homework/${homework.id}`} key={homework.id} className="homework-card-link">
+                                <Link to={`homework/${homework.id}`} key={homework.id} className="homework-card-link">
                                     <div className="homework-card">
                                         <div className="homework-header">
                                             <span className="homework-id">Номер: {homework.id}</span>
                                             <span className="homework-date">
-                                                {new Date(homework.createdAt).toLocaleString()}
+                                                {new Date(homework.timeCreate).toLocaleString()}
                                             </span>
                                         </div>
 
                                         <div className="homework-meta">
                                             <div className="meta-item">
-                                                <span className="meta-label">Student:</span>
-                                                <span className="meta-value">{homework.studentName}</span>
+                                                <span className="meta-label">Студент:</span>
+                                                <span className="meta-value">
+                                                    {students.find(s => s.id === homework.idStudent)?.name || 'Неизвестный студент'}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -232,6 +265,9 @@
                                         )}
                                     </div>
                                 </div>
+
+                                {/* Сообщение об ошибке */}
+                                {formError && <div className="form-error">{formError}</div>}
 
                                 <div className="form-group">
                                     <label>Фото задания:</label>

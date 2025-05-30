@@ -46,13 +46,11 @@ public class SecurityConfig{
                 )
                 .formLogin(login -> login.disable())
                 .logout(logout -> logout.disable())
-                .httpBasic(Customizer.withDefaults())
+                .httpBasic(basic -> basic.disable())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/auth/login", "/auth/logout")
-                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                )
+                .anonymous(anonymous -> anonymous.authorities("ROLE_ANONYMOUS"))
+                .csrf(csrf -> csrf.disable())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()));
         return http.build();

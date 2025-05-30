@@ -61,16 +61,12 @@ public class ServiceImpl {
     @Transactional
     public Solution getSolution(Integer id){
         Solution solution = solutionDAO.getById(id);
-        if(solution == null)
-            throw new NoSuchElementException("У задания с Id = " + id + " нет решения");
         return solution;
     }
 
     @Transactional
     public Review getReviewById(Integer id){
         Review review = reviewDAO.getById(id);
-        if(review == null)
-            throw new NoSuchElementException("У заданния с Id = " + id + " нет оценки решения");
         return review;
     }
 

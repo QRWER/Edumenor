@@ -1,11 +1,14 @@
 package com.spring.edumentor.edumentorboot.controller;
 
-import com.spring.edumentor.edumentorboot.entity.Homework;
-import com.spring.edumentor.edumentorboot.entity.Review;
-import com.spring.edumentor.edumentorboot.entity.Solution;
+import com.spring.edumentor.edumentorboot.dao.MentorDAO;
+import com.spring.edumentor.edumentorboot.dao.UserDAO;
+import com.spring.edumentor.edumentorboot.entity.*;
 import com.spring.edumentor.edumentorboot.service.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,10 +26,37 @@ public class StudentController {
     @Autowired
     private ServiceImpl service;
 
+    @Autowired
+    private UserDAO userDAO;
+    @Autowired
+    private MentorDAO mentorDAO;
+
+    @GetMapping("/profile")
+    public ResponseEntity<?> getProfile() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = userDAO.getByUsername(((UserDetails) auth.getPrincipal()).getUsername());
+        return ResponseEntity.ok(service.getStudentById(user.getId()));
+    }
+
     @GetMapping("/homework")
-    public ResponseEntity<?> showAllHomeworkForStudent(@RequestParam(value = "idStudent") int id){
-        List<Homework> homeworks = service.getAllHomeworkForStudent(id);
-        return homeworks.isEmpty()?ResponseEntity.notFound().build():ResponseEntity.ok(homeworks);
+    public ResponseEntity<?> showAllHomeworkForStudent(){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = userDAO.getByUsername(((UserDetails) auth.getPrincipal()).getUsername());
+        List<Homework> homeworks = service.getAllHomeworkForStudent(user.getId());
+        return ResponseEntity.ok(homeworks);
+    }
+
+    @GetMapping("/mentors")
+    public ResponseEntity<?> showAllMentorsForStudent(){
+        List<Mentor> mentors = mentorDAO.getAll();
+        System.out.println("Я ТУТА: " + mentors);
+        return ResponseEntity.ok(mentors);
+    }
+
+    @GetMapping("/mentor/{idMentor}")
+    public ResponseEntity<?> showMentorForStudent(@PathVariable int idMentor){
+        Mentor mentor = service.getMentorById(idMentor);
+        return mentor==null?ResponseEntity.notFound().build():ResponseEntity.ok(mentor);
     }
 
     @GetMapping("/homework/{idHomework}")
@@ -38,13 +68,14 @@ public class StudentController {
     @GetMapping("/solution/{idHomework}")
     public ResponseEntity<?> showSolutionForHomework(@PathVariable("idHomework") int id){
         Solution solution = service.getSolution(id);
-        return solution==null?ResponseEntity.notFound().build():ResponseEntity.ok(solution);
+        System.out.println("РЕШЕНИЕ!!!!!" + solution);
+        return ResponseEntity.ok(solution);
     }
 
     @GetMapping("/review/{idHomework}")
     public ResponseEntity<?> showReviewForHomework(@PathVariable("idHomework") int id){
         Review review = service.getReviewById(id);
-        return review==null?ResponseEntity.notFound().build():ResponseEntity.ok(review);
+        return ResponseEntity.ok(review);
     }
 
     @PostMapping(value = "/solution", consumes = {MULTIPART_FORM_DATA_VALUE})

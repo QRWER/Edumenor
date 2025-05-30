@@ -1,12 +1,14 @@
 package com.spring.edumentor.edumentorboot.controller;
 
-import com.spring.edumentor.edumentorboot.entity.Homework;
-import com.spring.edumentor.edumentorboot.entity.Review;
-import com.spring.edumentor.edumentorboot.entity.Solution;
-import com.spring.edumentor.edumentorboot.entity.Student;
+import com.spring.edumentor.edumentorboot.dao.MentorDAO;
+import com.spring.edumentor.edumentorboot.dao.UserDAO;
+import com.spring.edumentor.edumentorboot.entity.*;
 import com.spring.edumentor.edumentorboot.service.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,6 +26,17 @@ public class MentorController {
 
     @Autowired
     private ServiceImpl service;
+    @Autowired
+    private MentorDAO mentorDAO;
+    @Autowired
+    private UserDAO userDAO;
+
+    @GetMapping("/profile")
+    public ResponseEntity<?> getProfile() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = userDAO.getByUsername(((UserDetails) auth.getPrincipal()).getUsername());
+        return ResponseEntity.ok(service.getMentorById(user.getId()));
+    }
 
     @GetMapping("/students")
     public ResponseEntity<?> showStudentsByName(@RequestParam(required = false, value = "name") String name){
@@ -52,20 +65,20 @@ public class MentorController {
     @GetMapping("/solution/{idHomework}")
     public ResponseEntity<?> showSolutionForHomework(@PathVariable("idHomework") int id){
         Solution solution = service.getSolution(id);
-        return solution==null?ResponseEntity.notFound().build():ResponseEntity.ok(solution);
+        return ResponseEntity.ok(solution);
     }
 
     @GetMapping("/review/{idHomework}")
     public ResponseEntity<?> showReviewForHomework(@PathVariable("idHomework") int id){
         Review review = service.getReviewById(id);
-        return review==null?ResponseEntity.notFound().build():ResponseEntity.ok(review);
+        return ResponseEntity.ok(review);
     }
 
     @PostMapping(value = "/homework", consumes = {MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<?> addHomework(@RequestParam int id_mentor,
-                                @RequestParam int id_student,
+    public ResponseEntity<?> addHomework(@RequestParam int idMentor,
+                                @RequestParam int idStudent,
                                 @RequestParam MultipartFile task) throws IOException {
-        Homework newHomework = service.addHomework(new Homework(id_mentor, id_student, task.getBytes()));
+        Homework newHomework = service.addHomework(new Homework(idMentor, idStudent, task.getBytes()));
         return newHomework==null?ResponseEntity.badRequest().build():ResponseEntity.ok(newHomework);
     }
 
