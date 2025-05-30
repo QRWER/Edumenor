@@ -41,7 +41,7 @@ public class MentorController {
     @GetMapping("/students")
     public ResponseEntity<?> showStudentsByName(@RequestParam(required = false, value = "name") String name){
         List<Student> students = name!=null?service.getStudentByName(name):service.getAllStudents();
-        return students.isEmpty()?ResponseEntity.notFound().build():ResponseEntity.ok(students);
+        return ResponseEntity.ok(students);
     }
 
     @GetMapping("/student/{idStudent}")
